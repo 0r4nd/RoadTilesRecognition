@@ -1,4 +1,5 @@
 # RoadTilesRecognition
+Projet de simulation de circulation de petits véhicules autonomes sur une route faite de tiles.
 
 ## Tileset
 <div style="text-align:left">
@@ -8,9 +9,6 @@
   <img src="data/road_tiles/tile4.jpg" width="160">
   <img src="data/road_tiles/tile5.jpg" width="160">
 </div>
-
-# Definition
-Projet de simulation de circulation de petits véhicules autonomes sur une route faite de tiles.
 
 ## Software Local
 - Reconnaissance de Tiles basique (en vue de face)
