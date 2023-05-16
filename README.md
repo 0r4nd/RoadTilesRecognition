@@ -24,9 +24,10 @@ le robot doit être capable de générer une tileMap à partir de son module de 
 
 ## Hardware Robot
 - Le robot est piloté par un ESP32-CAM
-- Le chassis est un simple PCB 7x5
-- Le robot possède seulement deux roues et doit donc se maintenir en équilibre
-- L'alimentation se fait par un super-cap 60F + un mini convertisseur boost
+- Le chassis est un simple PCB 60x40mm
+- Le robot possède deux roues et doit donc se maintenir en équilibre (GY-6500)
+- 2 moteurs stepper + drivers (DRV8833/L298N)
+- L'alimentation se fait par un super-cap 60F + mini convertisseur boost (DD0405MA)
 
   <img src="data/modules.jpg" width="400">
   
