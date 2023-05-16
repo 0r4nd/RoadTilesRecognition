@@ -28,3 +28,6 @@ le robot doit être capable de générer une tileMap à partir de son module de 
 - Le robot possède seulement deux roues et doit donc se maintenir en équilibre
 - L'alimentation se fait par un super-cap 60F + un mini convertisseur boost
 
+  <img src="data/modules.jpg" width="400">
+  
+  
