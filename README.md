@@ -1,4 +1,5 @@
 # RoadTilesRecognition
+Projet de simulation de circulation de petits véhicules autonomes sur une route faite de tiles.
 
 ## Tileset
 <div style="text-align:left">
@@ -9,22 +10,24 @@
   <img src="data/road_tiles/tile5.jpg" width="160">
 </div>
 
-# Definition
-Projet de reconnaissance de t
+## Software Local
+- Reconnaissance de Tiles basique (en vue de face)
+- Reconnaissance Multiple (R-CNN)
+- Moteur 3D basique pour rotation/translation des tiles (data augmentation)
+- La position de l'objet doit être un quad (pas une bbox) 
 
 ## Software Robot
-Reconnaissance route (tensorflow lite):
-- Tiles Position Multiple (R-CNN)
-- Data augmentation
-
-Moteur interne:
-le robot doit être capable de générer une tileMap à partir de son module de détection de tiles
-- module de gestion tileMap basique
-- moteur physique basique
+- Module de gestion tileMap basique
+- Moteur physique basique
+- Génération d'une tileMap à partir de son module de détection de tiles
+- Prédiction sur la hauteur/orientation (à tester)
 
 ## Hardware Robot
 - Le robot est piloté par un ESP32-CAM
-- Le chassis est un simple PCB 7x5
-- Le robot possède seulement deux roues et doit donc se maintenir en équilibre
-- L'alimentation se fait par un super-cap 60F + un mini convertisseur boost
+- Le chassis est un simple PCB 60x40mm
+- Le robot possède deux roues et doit donc se maintenir en équilibre (GY-6500)
+- 2 moteurs stepper + drivers (DRV8833/L298N)
+- L'alimentation se fait par un super-cap 60F + mini convertisseur boost (DD0405MA)
 
+<img src="data/modules.jpg" width="400">
+  
