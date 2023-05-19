@@ -5,23 +5,17 @@
 #include "I2C.h"
 #include "MPU9250.h"
 
-
-
-uint8_t Buf[14];
-float yangle;
-
-
+MPU9250 *imu;
 
 void setup() {
-  Wire.begin();
-  I2C_writeByte(MPU9250_ADDRESS, 29, 0x06);
-  I2C_writeByte(MPU9250_ADDRESS, 28, MPU9250_ACC_FULL_SCALE_2_G);
-  I2C_writeByte(MPU9250_ADDRESS, 108, 0x2F);
+  Serial.begin(115200);
+
+  imu = new_MPU9250(0x68);
+  MPU9250_begin(imu);
+
+  pinMode(13, OUTPUT);
 }
 
 void loop() {
-  I2C_read(MPU9250_ADDRESS, 0x3B, 14, Buf);
-  int16_t ay = -(Buf[2] << 8 | Buf[3]);
-  yangle = ay / 182.04;
-  delay(100);
+
 }
