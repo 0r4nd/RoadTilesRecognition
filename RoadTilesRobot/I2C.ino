@@ -1,24 +1,24 @@
 
 
-#include <stdint.h>
-#include "Wire.h"
+#include "I2C.h"
 
 
-void I2C_read(uint8_t Address, uint8_t Register, uint8_t Nbytes, uint8_t *Data)
+int I2C_read(uint8_t address, uint8_t Register, uint8_t count, uint8_t *data)
 {
-  Wire.beginTransmission(Address);
+  Wire.beginTransmission(address);
   Wire.write(Register);
   Wire.endTransmission();
-  Wire.requestFrom(Address, Nbytes);
-  while (Wire.available()) {
-    *Data++ = Wire.read();
+  if (Wire.requestFrom(address, count) == count) {
+    while (Wire.available()) *data++ = Wire.read();
+    return 1;
   }
+  return -1;
 }
 
-void I2C_writeByte(uint8_t Address, uint8_t Register, uint8_t Data)
+void I2C_writeByte(uint8_t address, uint8_t Register, uint8_t data)
 {
-  Wire.beginTransmission(Address);
+  Wire.beginTransmission(address);
   Wire.write(Register);
-  Wire.write(Data);
+  Wire.write(data);
   Wire.endTransmission();
 }
