@@ -1,7 +1,34 @@
 
 
 #include <Arduino.h>
+#include <math.h>
 #include "mpu9250.h"
+
+
+#define MPU9250_IMU_ADDRESS 0x68
+#define MPU9250_MAG_ADDRESS 0x0C
+
+const float G = 9.80665f;
+
+
+float mpu_getPitch(bfs::Mpu9250 &imu) {
+  float accel_x = imu.accel_x_mps2() / G;
+  float accel_z = -imu.accel_z_mps2() / G;
+  float theta = atan2(accel_x, accel_z) / 2.0 / 3.141592654 * 360.0;
+  return -theta;
+}
+
+float mpu_getRoll(bfs::Mpu9250 &imu) {
+  float accel_y = imu.accel_y_mps2() / G;
+  float accel_z = -imu.accel_z_mps2() / G;
+  float phi = atan2(accel_y, accel_z) / 2.0 / 3.141592654 * 360.0;
+  return phi;
+}
+
+float mpu_getYaw(bfs::Mpu9250 &imu) {
+  return 0;
+}
+
 
 
 /* Mpu9250 object */
@@ -32,6 +59,7 @@ void setup() {
   }
 }
 
+
 void loop() {
   /* Check if data read */
   if (imu.Read()) {
@@ -41,20 +69,28 @@ void loop() {
     Serial.print(imu.new_mag_data());
     Serial.print("\t");
     */
-    Serial.print("Accel: (");
-    Serial.print(imu.accel_x_mps2());
-    Serial.print(", ");
-    Serial.print(imu.accel_y_mps2());
-    Serial.print(", ");
-    Serial.print(imu.accel_z_mps2());
-    Serial.print(")");
+
+    //Serial.print("Accel: (");
+    Serial.print(imu.accel_x_mps2()/G);
+    Serial.print(",");
+    Serial.print(imu.accel_y_mps2()/G);
+    Serial.print(",");
+    Serial.print(-imu.accel_z_mps2()/G);
+    Serial.print(",");
+    Serial.print(mpu_getPitch(imu));
+    Serial.print(",");
+    Serial.println(mpu_getRoll(imu));
+
+    
+    //Serial.print(")\n");
+    /*
     Serial.print(" Gyro: (");
     Serial.print(imu.gyro_x_radps());
     Serial.print(", ");
     Serial.print(imu.gyro_y_radps());
     Serial.print(", ");
     Serial.print(imu.gyro_z_radps());
-    Serial.print(")");
+    Serial.print(")");*/
     /*
     Serial.print(imu.mag_x_ut());
     Serial.print("\t");
@@ -62,9 +98,9 @@ void loop() {
     Serial.print("\t");
     Serial.print(imu.mag_z_ut());
     Serial.print("\t");*/
-    Serial.print(" Temp: ");
+    /*Serial.print(" Temp: ");
     Serial.print(imu.die_temp_c());
-    Serial.print("°C\n");
+    Serial.print("°C)");*/
   }
 }
 
