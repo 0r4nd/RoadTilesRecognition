@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <math.h>
 #include "mpu9250.h"
-
+#include "Filter1D.h"
 
 #define MPU9250_IMU_ADDRESS 0x68
 #define MPU9250_MAG_ADDRESS 0x0C
@@ -11,28 +11,51 @@
 const float G = 9.80665f;
 
 
-float mpu_getPitch(bfs::Mpu9250 &imu) {
-  float accel_x = imu.accel_x_mps2() / G;
-  float accel_z = -imu.accel_z_mps2() / G;
-  float theta = atan2(accel_x, accel_z) / 2.0 / 3.141592654 * 360.0;
-  return -theta;
+float mpu_getYaw(bfs::Mpu9250 &imu, Filter1D *filter = NULL) {
+  return 0;
 }
 
-float mpu_getRoll(bfs::Mpu9250 &imu) {
+float mpu_getPitch(bfs::Mpu9250 &imu, Filter1D *filter = NULL) {
+  float accel_x = imu.accel_x_mps2() / G;
+  float accel_z = -imu.accel_z_mps2() / G;
+  float theta = -atan2(accel_x, accel_z) / 2.0 / 3.141592654 * 360.0;
+  if (filter != NULL) {
+    filter->addSample(theta);
+    theta = filter->getValue();
+  }
+  return theta;
+}
+
+float mpu_getRoll(bfs::Mpu9250 &imu, Filter1D *filter = NULL) {
   float accel_y = imu.accel_y_mps2() / G;
   float accel_z = -imu.accel_z_mps2() / G;
   float phi = atan2(accel_y, accel_z) / 2.0 / 3.141592654 * 360.0;
+  if (filter != NULL) {
+    filter->addSample(phi);
+    phi = filter->getValue();
+  }
   return phi;
 }
 
-float mpu_getYaw(bfs::Mpu9250 &imu) {
-  return 0;
+float *mpu_getEuler(bfs::Mpu9250 &imu,
+                    Filter1D *yaw = NULL,
+                    Filter1D *pitch = NULL,
+                    Filter1D *roll = NULL) {
+  static float euler[3];
+  euler[0] = mpu_getYaw(imu,yaw);
+  euler[1] = mpu_getPitch(imu,pitch);
+  euler[2] = mpu_getRoll(imu,roll);
+  return euler;
 }
 
 
 
 /* Mpu9250 object */
 bfs::Mpu9250 imu;
+Filter1D pitch_filter(32);
+Filter1D roll_filter(32);
+
+
 
 void setup() {
   /* Serial to display data */
@@ -69,6 +92,7 @@ void loop() {
     Serial.print(imu.new_mag_data());
     Serial.print("\t");
     */
+    float *euler = mpu_getEuler(imu, NULL, &pitch_filter, &roll_filter);
 
     //Serial.print("Accel: (");
     Serial.print(imu.accel_x_mps2()/G);
@@ -79,8 +103,15 @@ void loop() {
     Serial.print(",");
     Serial.print(mpu_getPitch(imu));
     Serial.print(",");
-    Serial.println(mpu_getRoll(imu));
+    Serial.print(mpu_getRoll(imu));
+    Serial.print(",");
+    Serial.print(euler[1]);
+    Serial.print(",");
+    Serial.println(euler[2]);
 
+
+    pitch_filter.update();
+    roll_filter.update();
     
     //Serial.print(")\n");
     /*
