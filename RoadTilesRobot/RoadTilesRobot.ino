@@ -8,17 +8,20 @@
 #define MPU9250_IMU_ADDRESS 0x68
 #define MPU9250_MAG_ADDRESS 0x0C
 
-const float G = 9.80665f;
+#define RAD2DEG (180.0 / 3.141592654)
+#define G 9.80665f
 
 
 float mpu_getYaw(bfs::Mpu9250 &imu, Filter1D *filter = NULL) {
-  return 0;
+  float yaw = 0;
+  if (yaw < 0) yaw += 360.0;
+  return yaw;
 }
 
 float mpu_getPitch(bfs::Mpu9250 &imu, Filter1D *filter = NULL) {
   float accel_x = imu.accel_x_mps2() / G;
   float accel_z = -imu.accel_z_mps2() / G;
-  float theta = -atan2(accel_x, accel_z) / 2.0 / 3.141592654 * 360.0;
+  float theta = -atan2(accel_x, accel_z) * RAD2DEG;
   if (filter != NULL) {
     filter->addSample(theta);
     theta = filter->getValue();
@@ -26,10 +29,11 @@ float mpu_getPitch(bfs::Mpu9250 &imu, Filter1D *filter = NULL) {
   return theta;
 }
 
+
 float mpu_getRoll(bfs::Mpu9250 &imu, Filter1D *filter = NULL) {
   float accel_y = imu.accel_y_mps2() / G;
   float accel_z = -imu.accel_z_mps2() / G;
-  float phi = atan2(accel_y, accel_z) / 2.0 / 3.141592654 * 360.0;
+  float phi = atan2(accel_y, accel_z) * RAD2DEG;
   if (filter != NULL) {
     filter->addSample(phi);
     phi = filter->getValue();
@@ -52,8 +56,23 @@ float *mpu_getEuler(bfs::Mpu9250 &imu,
 
 /* Mpu9250 object */
 bfs::Mpu9250 imu;
-Filter1D pitch_filter(32);
-Filter1D roll_filter(32);
+Filter1D pitch_filter(80);
+Filter1D roll_filter(80);
+
+
+// esp32-default
+//#define I2C_SDA 40
+//#define I2C_SCL 41
+
+// esp32-cam
+#define I2C_SDA 14
+#define I2C_SCL 15
+  
+// esp32-lolin32 lite
+//#define I2C_SDA 15
+//#define I2C_SCL 2
+
+#define I2C_FREQUENCY 100000 // 400000
 
 
 
@@ -63,11 +82,14 @@ void setup() {
   while(!Serial) {}
   
   /* Start the I2C bus */
-  Wire.begin();
-  Wire.setClock(400000);
+  // if ESP32
+  Wire.begin(I2C_SDA, I2C_SCL, I2C_FREQUENCY);
+  // if arduino
+  //Wire.begin();
+  //Wire.setClock(400000);
   
   /* I2C bus,  0x68 address */
-  imu.Config(&Wire, MPU9250_IMU_ADDRESS);
+  imu.Config(&Wire, bfs::Mpu9250::I2C_ADDR_PRIM);
   delay(1000);
   
   /* Initialize and configure IMU */
@@ -95,12 +117,18 @@ void loop() {
     float *euler = mpu_getEuler(imu, NULL, &pitch_filter, &roll_filter);
 
     //Serial.print("Accel: (");
+    // scale
+    Serial.print(-50);
+    Serial.print(",");
+    Serial.print(50);
+    Serial.print(",");
+/*
     Serial.print(imu.accel_x_mps2()/G);
     Serial.print(",");
     Serial.print(imu.accel_y_mps2()/G);
     Serial.print(",");
     Serial.print(-imu.accel_z_mps2()/G);
-    Serial.print(",");
+    Serial.print(",");*/
     Serial.print(mpu_getPitch(imu));
     Serial.print(",");
     Serial.print(mpu_getRoll(imu));
@@ -135,91 +163,3 @@ void loop() {
   }
 }
 
-
-
-
-/*
-#include <Arduino.h>
-
-#include "Wire.h"
-#include "MPU9250.h"
-*/
-
-
-
-
-
-/*
-int status;
-
-// -----------------I2C-----------------
-
-// ESP32-CAM
-//#define I2C_SDA_PIN 14
-//#define I2C_SCL_PIN 15
-//TwoWire I2CMPU = TwoWire(0);
-
-// ESP32-WROOM
-MPU9250 imu;
-#define I2C_SDA_PIN 21
-#define I2C_SCL_PIN 22
-
-
-void setup() {
-  Serial.begin(115200);
-  while (!Serial) {}
-  Serial.println("Started");
-  
-  // ESP32-CAM
-  // I2CMPU.begin(I2C_SDA, I2C_SCL, 100000);
-  // MPU9250 IMU(I2CMPU, 0x68);
-
-  // ESP32-WROOM
-  Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
-  imu.setWire(&Wire);
-
-  //status = imu.begin();
-  status = imu.beginAccel();
-  status = imu.beginMag();
-  if (status < 0) {
-    Serial.println("IMU initialization unsuccessful");
-    Serial.println("Check IMU wiring or try cycling power");
-    Serial.print("Status: ");
-    Serial.println(status);
-    while (1){}
-  } else {
-    Serial.println("IMU initialization success");
-  }
-  
-  //pinMode(13, OUTPUT);
-}
-
-void loop() {
-  // read the sensor
-  //MPU9250_readSensor(imu);
-  
-
-  // display the data
-  //Serial.print(IMU.getAccelX_mss(), 6);
-  //Serial.print("\t");
-  //Serial.print(IMU.getAccelY_mss(), 6);
-  //Serial.print("\t");
-  //Serial.print(IMU.getAccelZ_mss(), 6);
-  //Serial.print("\t");
-  //Serial.print(IMU.getGyroX_rads(), 6);
-  //Serial.print("\t");
-  //Serial.print(IMU.getGyroY_rads(), 6);
-  //Serial.print("\t");
-  //Serial.print(IMU.getGyroZ_rads(), 6);
-  //Serial.print("\t");
-  //Serial.print(IMU.getMagX_uT(), 6);
-  //Serial.print("\t");
-  //Serial.print(IMU.getMagY_uT(), 6);
-  //Serial.print("\t");
-  //Serial.print(IMU.getMagZ_uT(), 6);
-  //Serial.print("\t");
-  //Serial.println(IMU.getTemperature_C(), 6);
-
-  delay(100);
-}
-*/
