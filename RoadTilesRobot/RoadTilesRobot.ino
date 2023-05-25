@@ -74,6 +74,10 @@ Filter1D roll_filter(80);
 #define I2C_FREQUENCY 100000 // 400000
 
 
+float thetaG = 0.0;
+float phiG = 0.0;
+float dt = 0.0;
+uint32_t millisOld;
 
 void setup() {
   /* Serial to display data */
@@ -101,7 +105,11 @@ void setup() {
     Serial.println("Error configured SRD");
     while(1) {}
   }
+
+  millisOld = millis();
 }
+
+
 
 
 void loop() {
@@ -128,17 +136,36 @@ void loop() {
     Serial.print(",");
     Serial.print(-imu.accel_z_mps2()/G);
     Serial.print(",");*/
+    /*
     Serial.print(mpu_getPitch(imu));
     Serial.print(",");
     Serial.print(mpu_getRoll(imu));
     Serial.print(",");
+*/
     Serial.print(euler[1]);
     Serial.print(",");
-    Serial.println(euler[2]);
+    Serial.print(euler[2]);
+    Serial.print(",");
 
-    pitch_filter.update();
-    roll_filter.update();
-    
+
+    dt = (millis() - millisOld) / 1000.0;
+    millisOld = millis();
+
+    thetaG = thetaG - imu.gyro_y_radps()*RAD2DEG*dt;
+    phiG =  phiG - imu.gyro_x_radps()*RAD2DEG*dt;
+    Serial.print(thetaG);
+    Serial.print(",");
+    Serial.print(phiG);
+    Serial.println(",");
+
+    /*
+    Serial.print(imu.gyro_x_radps());
+    Serial.print(",");
+    Serial.print(imu.gyro_y_radps());
+    Serial.print(",");
+    Serial.println(imu.gyro_z_radps());
+    */
+
     //Serial.print(")\n");
     /*
     Serial.print(" Gyro: (");
@@ -158,6 +185,9 @@ void loop() {
     /*Serial.print(" Temp: ");
     Serial.print(imu.die_temp_c());
     Serial.print("°C)");*/
+
+    pitch_filter.update();
+    roll_filter.update();
   }
 }
 
