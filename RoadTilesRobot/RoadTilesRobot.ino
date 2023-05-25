@@ -59,7 +59,6 @@ bfs::Mpu9250 imu;
 Filter1D pitch_filter(80);
 Filter1D roll_filter(80);
 
-
 // esp32-default
 //#define I2C_SDA 40
 //#define I2C_SCL 41
@@ -86,7 +85,7 @@ void setup() {
   Wire.begin(I2C_SDA, I2C_SCL, I2C_FREQUENCY);
   // if arduino
   //Wire.begin();
-  //Wire.setClock(400000);
+  //Wire.setClock(I2C_FREQUENCY);
   
   /* I2C bus,  0x68 address */
   imu.Config(&Wire, bfs::Mpu9250::I2C_ADDR_PRIM);
@@ -136,7 +135,6 @@ void loop() {
     Serial.print(euler[1]);
     Serial.print(",");
     Serial.println(euler[2]);
-
 
     pitch_filter.update();
     roll_filter.update();
