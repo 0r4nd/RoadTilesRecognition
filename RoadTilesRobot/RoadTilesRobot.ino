@@ -41,17 +41,20 @@ float mpu_getRoll(bfs::Mpu9250 &imu, Filter1D *filter = NULL) {
   return phi;
 }
 
-float *mpu_getEuler(bfs::Mpu9250 &imu,
+float *mpu_getEuler(bfs::Mpu9250 &imu, float dt,
                     Filter1D *yaw = NULL,
                     Filter1D *pitch = NULL,
                     Filter1D *roll = NULL) {
-  static float euler[3];
+  static float euler[3] = {0,0,0};
+  dt /= 1000.0;
   euler[0] = mpu_getYaw(imu,yaw);
-  euler[1] = mpu_getPitch(imu,pitch);
-  euler[2] = mpu_getRoll(imu,roll);
+  euler[1] = (euler[1] - imu.gyro_y_radps()*RAD2DEG*dt)*0.95 + mpu_getPitch(imu,pitch)*0.05;
+  euler[2] = (euler[2] - imu.gyro_x_radps()*RAD2DEG*dt)*0.95 + mpu_getRoll(imu,roll)*0.05;
+  //euler[0] = mpu_getYaw(imu,yaw);
+  //euler[1] = mpu_getPitch(imu,pitch);
+  //euler[2] = mpu_getRoll(imu,roll);
   return euler;
 }
-
 
 
 /* Mpu9250 object */
@@ -76,6 +79,8 @@ Filter1D roll_filter(80);
 
 float thetaG = 0.0;
 float phiG = 0.0;
+float theta;
+float phi;
 float dt = 0.0;
 uint32_t millisOld;
 
@@ -111,7 +116,6 @@ void setup() {
 
 
 
-
 void loop() {
   /* Check if data read */
   if (imu.Read()) {
@@ -121,7 +125,9 @@ void loop() {
     Serial.print(imu.new_mag_data());
     Serial.print("\t");
     */
-    float *euler = mpu_getEuler(imu, NULL, &pitch_filter, &roll_filter);
+    dt = millis() - millisOld;
+    millisOld = millis();
+    float *euler = mpu_getEuler(imu, dt, NULL, &pitch_filter, &roll_filter);
 
     //Serial.print("Accel: (");
     // scale
@@ -148,15 +154,16 @@ void loop() {
     Serial.print(",");
 
 
-    dt = (millis() - millisOld) / 1000.0;
-    millisOld = millis();
-
+/*
     thetaG = thetaG - imu.gyro_y_radps()*RAD2DEG*dt;
     phiG =  phiG - imu.gyro_x_radps()*RAD2DEG*dt;
-    Serial.print(thetaG);
+    theta = (theta - imu.gyro_y_radps()*RAD2DEG*dt)*0.95 + euler[1]*0.05;
+    phi = (phi - imu.gyro_x_radps()*RAD2DEG*dt)*0.95 + euler[2]*0.05;
+
+    Serial.print(theta);
     Serial.print(",");
-    Serial.print(phiG);
-    Serial.println(",");
+    Serial.print(phi);
+    Serial.println(",");*/
 
     /*
     Serial.print(imu.gyro_x_radps());
