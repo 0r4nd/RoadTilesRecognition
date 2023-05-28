@@ -27,7 +27,7 @@ Projet de simulation de circulation de petits véhicules autonomes sur une route
 - Le chassis est un simple PCB 60x40mm
 - Le robot possède deux roues et se tiens en équilibre grace à un (faux) module MPU9250.
 
-- 2 moteurs stepper + drivers (DRV8833/L298N)
+- 2 micro-steppers + drivers (A4988)
 - L'alimentation se fait par un super-cap 60F + mini convertisseur boost (DD0405MA)
 
 <img src="data/robot-wiring.png" width="600">
