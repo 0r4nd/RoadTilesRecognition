@@ -30,5 +30,6 @@ Projet de simulation de circulation de petits véhicules autonomes sur une route
 - 2 moteurs stepper + drivers (DRV8833/L298N)
 - L'alimentation se fait par un super-cap 60F + mini convertisseur boost (DD0405MA)
 
+<img src="data/robot-wiring.png" width="600">
 <img src="data/modules.jpg" width="400">
   
